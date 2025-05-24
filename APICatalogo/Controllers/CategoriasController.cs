@@ -11,10 +11,10 @@ namespace APICatalogo.Controllers
     [ApiController]
     public class CategoriasController : ControllerBase
     {
-        private readonly ICategoriaRepository repository;
+        private readonly IRepository<Categoria> repository;
         private readonly ILogger<CategoriasController> _logger;
 
-        public CategoriasController(ILogger<CategoriasController> logger, ICategoriaRepository repository)
+        public CategoriasController(ILogger<CategoriasController> logger, IRepository<Categoria> repository)
         {
             _logger = logger;
             this.repository = repository;
@@ -23,7 +23,7 @@ namespace APICatalogo.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Categoria>> Get()
         {
-            var categorias = repository.GetCategorias();
+            var categorias = repository.GetAll();
 
             return Ok(categorias);
         }
@@ -31,7 +31,7 @@ namespace APICatalogo.Controllers
         [HttpGet("{id:int}", Name = "ObterCategoria")]
         public ActionResult<Categoria> Get(int id)
         {
-            var categoria = repository.GetCategoria(id);
+            var categoria = repository.Get(c => c.CategoriaId == id);
 
             if (categoria is null)
             {
@@ -50,7 +50,7 @@ namespace APICatalogo.Controllers
                 return BadRequest("Dados inválidos");
             }
 
-            var novaCategoria = repository.Add(categoria);
+            var novaCategoria = repository.Create(categoria);
 
             return CreatedAtRoute("ObterCategoria", new { id = novaCategoria.CategoriaId }, novaCategoria);
         }
@@ -73,7 +73,7 @@ namespace APICatalogo.Controllers
         [HttpDelete("{id:int}")]
         public ActionResult Delete(int id)
         {
-            var categoria = repository.GetCategoria(id);
+            var categoria = repository.Get(c => c.CategoriaId == id);
 
             if (categoria is null)
             {
@@ -81,7 +81,7 @@ namespace APICatalogo.Controllers
                 return NotFound($"Categoria com id= {id} não encontrada...");
             }
 
-            var categoriaDeletada = repository.Delete(id);
+            var categoriaDeletada = repository.Delete(categoria);
 
             return Ok(categoriaDeletada);
         }
