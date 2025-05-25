@@ -2,6 +2,8 @@ using System.Text.Json.Serialization;
 using APICatalogo.Context;
 using APICatalogo.Extensions;
 using APICatalogo.Filters;
+using APICatalogo.Repositories;
+using APICatalogo.Repositories.Interfaces;
 using APICatalogo.Repository;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,6 +34,7 @@ builder.Services.AddDbContext<ApiCatalogoContext>(options =>
 builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
 builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ApiLogginFilter>();
 
 var app = builder.Build();

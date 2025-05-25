@@ -1,6 +1,6 @@
 ﻿using APICatalogo.Context;
 using APICatalogo.Models;
-using APICatalogo.Repository;
+using APICatalogo.Repositories.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,33 +11,37 @@ namespace APICatalogo.Controllers
     [ApiController]
     public class CategoriasController : ControllerBase
     {
-        private readonly IRepository<Categoria> repository;
+        
+        private readonly IUnitOfWork unitOfWork;
         private readonly ILogger<CategoriasController> _logger;
 
-        public CategoriasController(ILogger<CategoriasController> logger, IRepository<Categoria> repository)
+        public CategoriasController(ILogger<CategoriasController> logger, IUnitOfWork unitOfWork)
         {
             _logger = logger;
-            this.repository = repository;
+            this.unitOfWork = unitOfWork;
         }
 
         [HttpGet]
         public ActionResult<IEnumerable<Categoria>> Get()
         {
-            var categorias = repository.GetAll();
+                var categorias = unitOfWork.CategoriaRepository.GetAll();
 
-            return Ok(categorias);
+                return Ok(categorias);
+
         }
 
         [HttpGet("{id:int}", Name = "ObterCategoria")]
         public ActionResult<Categoria> Get(int id)
         {
-            var categoria = repository.Get(c => c.CategoriaId == id);
+            var categoria = unitOfWork.CategoriaRepository.Get(c => c.CategoriaId == id);
 
             if (categoria is null)
             {
                 _logger.LogWarning($"Categoria com id= {id} não encontrada...");
                 return NotFound($"Categoria com id= {id} não encontrada...");
             }
+
+
             return Ok(categoria);
         }
 
@@ -50,7 +54,9 @@ namespace APICatalogo.Controllers
                 return BadRequest("Dados inválidos");
             }
 
-            var novaCategoria = repository.Create(categoria);
+            var novaCategoria = unitOfWork.CategoriaRepository.Create(categoria);
+            unitOfWork.Commit();
+
 
             return CreatedAtRoute("ObterCategoria", new { id = novaCategoria.CategoriaId }, novaCategoria);
         }
@@ -64,8 +70,8 @@ namespace APICatalogo.Controllers
                 return BadRequest("Dados inválidos");
             }
 
-            repository.Update(categoria);
-
+            unitOfWork.CategoriaRepository.Update(categoria);
+            unitOfWork.Commit();
 
             return Ok(categoria);
         }
@@ -73,7 +79,7 @@ namespace APICatalogo.Controllers
         [HttpDelete("{id:int}")]
         public ActionResult Delete(int id)
         {
-            var categoria = repository.Get(c => c.CategoriaId == id);
+            var categoria = unitOfWork.CategoriaRepository.Get(c => c.CategoriaId == id);
 
             if (categoria is null)
             {
@@ -81,7 +87,8 @@ namespace APICatalogo.Controllers
                 return NotFound($"Categoria com id= {id} não encontrada...");
             }
 
-            var categoriaDeletada = repository.Delete(categoria);
+            var categoriaDeletada = unitOfWork.CategoriaRepository.Delete(categoria);
+            unitOfWork.Commit();
 
             return Ok(categoriaDeletada);
         }

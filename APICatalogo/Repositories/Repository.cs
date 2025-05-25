@@ -1,5 +1,7 @@
 ﻿using System.Linq.Expressions;
 using APICatalogo.Context;
+using APICatalogo.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace APICatalogo.Repository
 {
@@ -14,7 +16,7 @@ namespace APICatalogo.Repository
 
         public IEnumerable<T> GetAll()
         {
-            return context.Set<T>().ToList();
+            return context.Set<T>().AsNoTracking().ToList();
         }
 
         public T? Get(Expression<Func<T, bool>> predicate)
@@ -25,7 +27,6 @@ namespace APICatalogo.Repository
         public T Create(T entity)
         {
             context.Set<T>().Add(entity);
-            context.SaveChanges();
 
             return entity;
         }
@@ -34,7 +35,6 @@ namespace APICatalogo.Repository
         {
 
             context.Set<T>().Remove(entity);
-            context.SaveChanges();
 
             return entity;
 
@@ -43,7 +43,6 @@ namespace APICatalogo.Repository
         public T Update(T entity)
         {
             context.Set<T>().Update(entity);
-            context.SaveChanges();
 
             return entity;
         }
