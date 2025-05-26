@@ -15,7 +15,7 @@ namespace APICatalogo.Logging
         }
         public ILogger CreateLogger(string categoryName)
         {
-            return loggers.GetOrAdd(categoryName, name => new CustomerLogger(name, loggerConfig));
+            return (ILogger)loggers.GetOrAdd(categoryName, name => new CustomerLogger(name, loggerConfig));
         }
         public void Dispose()
         {
