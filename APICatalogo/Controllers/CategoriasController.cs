@@ -1,11 +1,7 @@
-﻿using APICatalogo.Context;
-using APICatalogo.DTOs;
+﻿using APICatalogo.DTOs;
 using APICatalogo.DTOs.Mappings;
-using APICatalogo.Models;
 using APICatalogo.Repositories.Interfaces;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace APICatalogo.Controllers
 {
@@ -14,19 +10,19 @@ namespace APICatalogo.Controllers
     public class CategoriasController : ControllerBase
     {
 
-        private readonly IUnitOfWork unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<CategoriasController> _logger;
 
         public CategoriasController(ILogger<CategoriasController> logger, IUnitOfWork unitOfWork)
         {
             _logger = logger;
-            this.unitOfWork = unitOfWork;
+            this._unitOfWork = unitOfWork;
         }
 
         [HttpGet]
         public ActionResult<IEnumerable<CategoriaDTO>> Get()
         {
-            var categorias = unitOfWork.CategoriaRepository.GetAll();
+            var categorias = _unitOfWork.CategoriaRepository.GetAll();
 
             var categoriasDTO = CategoriaDTOMappingExtensions.ToCategoriaDTOs(categorias);
 
@@ -37,7 +33,7 @@ namespace APICatalogo.Controllers
         [HttpGet("{id:int}", Name = "ObterCategoria")]
         public ActionResult<CategoriaDTO> Get(int id)
         {
-            var categoria = unitOfWork.CategoriaRepository.Get(c => c.CategoriaId == id);
+            var categoria = _unitOfWork.CategoriaRepository.Get(c => c.CategoriaId == id);
 
             if (categoria is null)
             {
@@ -61,8 +57,8 @@ namespace APICatalogo.Controllers
 
            var categoria = CategoriaDTOMappingExtensions.ToCategoria(categoriaDTO);
 
-            var novaCategoria = unitOfWork.CategoriaRepository.Create(categoria);
-            unitOfWork.Commit();
+            var novaCategoria = _unitOfWork.CategoriaRepository.Create(categoria);
+            _unitOfWork.Commit();
 
 
             return CreatedAtRoute("ObterCategoria", new { id = novaCategoria.CategoriaId }, novaCategoria);
@@ -79,8 +75,8 @@ namespace APICatalogo.Controllers
 
             var categoria = CategoriaDTOMappingExtensions.ToCategoria(categoriaDTO);
 
-            unitOfWork.CategoriaRepository.Update(categoria);
-            unitOfWork.Commit();
+            _unitOfWork.CategoriaRepository.Update(categoria);
+            _unitOfWork.Commit();
 
             var categoriaAtualizadaDTO = CategoriaDTOMappingExtensions.ToCategoriaDTO(categoria);
 
@@ -90,7 +86,7 @@ namespace APICatalogo.Controllers
         [HttpDelete("{id:int}")]
         public ActionResult<CategoriaDTO> Delete(int id)
         {
-            var categoria = unitOfWork.CategoriaRepository.Get(c => c.CategoriaId == id);
+            var categoria = _unitOfWork.CategoriaRepository.Get(c => c.CategoriaId == id);
 
             if (categoria is null)
             {
@@ -98,8 +94,8 @@ namespace APICatalogo.Controllers
                 return NotFound($"Categoria com id= {id} não encontrada...");
             }
 
-            var categoriaDeletada = unitOfWork.CategoriaRepository.Delete(categoria);
-            unitOfWork.Commit();
+            var categoriaDeletada = _unitOfWork.CategoriaRepository.Delete(categoria);
+            _unitOfWork.Commit();
 
             var categoriaDeletadaDTO = CategoriaDTOMappingExtensions.ToCategoriaDTO(categoriaDeletada);
 

@@ -1,9 +1,11 @@
 ﻿using APICatalogo.Context;
 using APICatalogo.DTOs;
 using APICatalogo.Models;
+using APICatalogo.Pagination;
 using APICatalogo.Repositories.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -113,6 +115,61 @@ namespace APICatalogo.Controllers
             var produtoDeletadoDTO = mapper.Map<ProdutoDTO>(produtoDeletado);
 
             return Ok(produtoDeletadoDTO);
+        }
+
+        [HttpPatch("{id:int}")]
+        public ActionResult<ProdutoDTOUpdateResponse> Patch(int id, JsonPatchDocument<ProdutoDTOUpdateRequest> patchProdutoDTO)
+        {
+            if (id <= 0 || patchProdutoDTO is null)
+            {
+                return BadRequest("Dados inválidos...");
+            }
+
+            var produto = unitOfWork.ProdutoRepository.Get(p => p.ProdutoId == id);
+            
+            if (produto is null)
+            {
+                return NotFound($"Produto com id= {id} não encontrado...");
+            }
+
+            var produtoDTOUpdateRequest = mapper.Map<ProdutoDTOUpdateRequest>(produto);
+
+            patchProdutoDTO.ApplyTo(produtoDTOUpdateRequest, ModelState);
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            mapper.Map(produtoDTOUpdateRequest, produto);
+            unitOfWork.ProdutoRepository.Update(produto);
+            unitOfWork.Commit();
+
+            var produtoDTOUpdateResponse = mapper.Map<ProdutoDTOUpdateResponse>(produto);
+
+            return Ok(produtoDTOUpdateResponse);
+        }
+
+        [HttpGet("pagination")]
+        public ActionResult<IEnumerable<ProdutoDTO>> GetProdutosPaginados([FromQuery] ProdutosParameters produtosParameters)
+        {
+            var produtos = unitOfWork.ProdutoRepository.GetProdutos(produtosParameters);
+            
+            var metadados = new
+            {
+                produtos.CurrentPage,
+                produtos.PageSize,
+                produtos.TotalCount,
+                produtos.TotalPages,
+                produtos.HasNext,
+                produtos.HasPrevious
+            };
+
+            Response.Headers.Append("X-Pagination", System.Text.Json.JsonSerializer.Serialize(metadados));
+
+            var produtosDTO = mapper.Map<IEnumerable<ProdutoDTO>>(produtos);
+
+            return Ok(produtosDTO);
         }
     }
 }
