@@ -1,5 +1,6 @@
 ﻿using APICatalogo.Context;
 using APICatalogo.Models;
+using APICatalogo.Pagination;
 using APICatalogo.Repositories.Interfaces;
 
 namespace APICatalogo.Repository
@@ -10,6 +11,16 @@ namespace APICatalogo.Repository
         {
         }
 
+        public PagedList<Categoria> GetCategorias(CategoriasParameters categoriasParameters)
+        {
+            var categoria = GetAll()
+                .OrderBy(c => c.CategoriaId)
+                .AsQueryable();
+            
+            var categoriasOrdenadas = PagedList<Categoria>.ToPagedList(categoria, categoriasParameters.PageNumber, categoriasParameters.PageSize);
+            
+            return categoriasOrdenadas;
+        }
     }
 }
 

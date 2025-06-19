@@ -1,5 +1,6 @@
 ﻿using APICatalogo.DTOs;
 using APICatalogo.DTOs.Mappings;
+using APICatalogo.Pagination;
 using APICatalogo.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -55,7 +56,7 @@ namespace APICatalogo.Controllers
                 return BadRequest("Dados inválidos");
             }
 
-           var categoria = CategoriaDTOMappingExtensions.ToCategoria(categoriaDTO);
+            var categoria = CategoriaDTOMappingExtensions.ToCategoria(categoriaDTO);
 
             var novaCategoria = _unitOfWork.CategoriaRepository.Create(categoria);
             _unitOfWork.Commit();
@@ -100,6 +101,28 @@ namespace APICatalogo.Controllers
             var categoriaDeletadaDTO = CategoriaDTOMappingExtensions.ToCategoriaDTO(categoriaDeletada);
 
             return Ok(categoriaDeletadaDTO);
+        }
+
+        [HttpGet("pagination")]
+        public ActionResult<IEnumerable<CategoriaDTO>> GetCategoriasPaginadas([FromQuery] CategoriasParameters categoriasParameters)
+        {
+            var categorias = _unitOfWork.CategoriaRepository.GetCategorias(categoriasParameters);
+
+            var metadados = new
+            {
+                categorias.TotalCount,
+                categorias.PageSize,
+                categorias.CurrentPage,
+                categorias.TotalPages,
+                categorias.HasNext,
+                categorias.HasPrevious
+            };
+
+            Response.Headers.Append("X-Pagination", System.Text.Json.JsonSerializer.Serialize(metadados));
+
+            var categoriasDTO = categorias.ToCategoriaDTOs();
+
+            return Ok(categoriasDTO);
         }
     }
 }
