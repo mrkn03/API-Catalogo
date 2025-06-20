@@ -32,9 +32,9 @@ namespace APICatalogo.Repositories
             }
         }
 
-        public void Commit()
+        public async Task CommitAsync()
         {
-            context.SaveChanges();            
+            await context.SaveChangesAsync();            
         }
 
         public void Dispose()

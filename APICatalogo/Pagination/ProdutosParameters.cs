@@ -1,6 +1,6 @@
 ﻿namespace APICatalogo.Pagination
 {
-    public class ProdutosParameters : QueryStringPagination
+    public class ProdutosParameters : QueryStringParameters
     {
        
     }

@@ -14,14 +14,14 @@ namespace APICatalogo.Repository
             this.context = context;
         }
 
-        public IEnumerable<T> GetAll()
+        public async Task<IEnumerable<T>> GetAllAsync()
         {
-            return context.Set<T>().AsNoTracking().ToList();
+            return await context.Set<T>().AsNoTracking().ToListAsync();
         }
 
-        public T? Get(Expression<Func<T, bool>> predicate)
+        public async Task<T?> GetAsync(Expression<Func<T, bool>> predicate)
         {
-            return context.Set<T>().FirstOrDefault(predicate);
+            return await context.Set<T>().FirstOrDefaultAsync(predicate);
         }
 
         public T Create(T entity)

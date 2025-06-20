@@ -12,21 +12,32 @@ namespace APICatalogo.Repository
 
         }
 
-        public PagedList<Produto> GetProdutos(ProdutosParameters produtosParameters)
+        public async Task<PagedList<Produto>> GetProdutosAsync(ProdutosParameters produtosParameters)
         {
 
-            var produtos = GetAll()
+            var produtos = await GetAllAsync();
+
+            var produtosOrdenados = produtos
                 .OrderBy(p => p.ProdutoId)
                 .AsQueryable();
 
-            var produtosOrdenados = PagedList<Produto>.ToPagedList(produtos, produtosParameters.PageNumber, produtosParameters.PageSize);
+            var resultado = PagedList<Produto>.ToPagedList(produtosOrdenados, produtosParameters.PageNumber, produtosParameters.PageSize);
 
-            return produtosOrdenados;
+            return resultado;
         }
 
-        public IEnumerable<Produto> GetProdutosPorCategoria(int id)
+        public Task<PagedList<Produto>> GetProdutosFiltroPrecoAsync(ProdutosFiltroPreco produtosFiltroParams)
         {
-            return GetAll().Where(p => p.CategoriaId == id);
+            throw new NotImplementedException();
+        }
+
+        public async Task<IEnumerable<Produto>> GetProdutosPorCategoriaAsync(int id)
+        {
+
+            var produtos = await GetAllAsync();
+
+
+            return produtos.Where(p => p.CategoriaId == id);
         }
     }
 }
